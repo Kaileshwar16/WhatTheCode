@@ -1,21 +1,45 @@
-// Listen for a message from the content script
+// background.js
+console.log("✅ Background.js service worker started!");
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+
+  console.log("📩 Received message in background:", message);
   if (message.action === 'getExplanation') {
     const codeSnippet = message.code;
+    const BACKEND_URL = 'http://127.0.0.1:5000/api/explain';
 
-    // --- THIS IS OUR MOCK AI ---
-    // In the future, we will replace this with a real API call
-    console.log("Background script received code:", codeSnippet.substring(0, 50) + "...");
-    
-    const mockExplanation = `This is a mock AI explanation for the code snippet that starts with: "${codeSnippet.substring(0, 30)}..."`;
+    (async () => {
+      try {
+        console.log("Sending request to backend...");
+        const response = await fetch(BACKEND_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ code: codeSnippet }),
+        });
 
-    // Simulate a network delay
-    setTimeout(() => {
-      sendResponse({ explanation: mockExplanation });
-    }, 800);
-    // ----------------------------
+        const data = await response.json(); // ✅ Parse once only
 
-    // IMPORTANT: Return true to indicate you will send a response asynchronously
-    return true; 
+        if (!response.ok) {
+          throw new Error(data.error || `Server responded with ${response.status}`);
+        }
+
+        if (data.error) {
+          throw new Error(data.error);
+        }
+
+        console.log("Explanation received:", data.explanation);
+        sendResponse({ explanation: data.explanation });
+
+      } catch (error) {
+        console.error("Error fetching explanation:", error);
+        let friendlyError = error.message;
+        if (error.message.includes('Failed to fetch')) {
+          friendlyError = 'Error: Cannot connect to Python backend. Is it running?';
+        }
+        sendResponse({ explanation: friendlyError });
+      }
+    })();
+
+    return true; // keep channel open
   }
 });
+

@@ -1,18 +1,22 @@
 {
   "manifest_version": 3,
-  "name": "Kailesh's Code Explainer",
-  "version": "0.1",
-  "description": "Hover over code to get an AI explanation.",
-  "content_scripts": [
-    {
-      "matches": [
-        "https://github.com/*"
-      ],
-      "js": ["content.js"],
-      "css": ["style.css"]
-    }
-  ],
+  "name": "WhatTheCode",
+  "version": "1.0",
+  "description": "Explains code snippets using your local AI backend.",
+  "permissions": ["scripting", "activeTab"],
+  "host_permissions": ["http://127.0.0.1:5000/*"],
   "background": {
     "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"]
+    }
+  ],
+  "icons": {
+    "16": "icon.png",
+    "48": "icon.png",
+    "128": "icon.png"
   }
 }
