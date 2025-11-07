@@ -1,0 +1,16 @@
+#code-explainer-tooltip {
+  position: absolute;
+  display: none; /* Hidden by default */
+  padding: 10px;
+  background-color: #282c34; /* A dark, code-like theme */
+  color: #abb2bf; /* Light text */
+  border: 1px solid #3e4451;
+  border-radius: 6px;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 14px;
+  line-height: 1.5;
+  max-width: 400px;
+  z-index: 99999;
+  pointer-events: none; /* So the tooltip doesn't block other mouse events */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}

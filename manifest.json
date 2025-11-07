@@ -1,0 +1,18 @@
+{
+  "manifest_version": 3,
+  "name": "Kailesh's Code Explainer",
+  "version": "0.1",
+  "description": "Hover over code to get an AI explanation.",
+  "content_scripts": [
+    {
+      "matches": [
+        "https://github.com/*"
+      ],
+      "js": ["content.js"],
+      "css": ["style.css"]
+    }
+  ],
+  "background": {
+    "service_worker": "background.js"
+  }
+}
