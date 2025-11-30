@@ -1,6 +1,6 @@
 console.log("Code Explainer content script loaded.");
 
-// Create tooltip
+
 const tooltip = document.createElement("div");
 tooltip.id = "code-explainer-tooltip";
 tooltip.style.position = "absolute";
