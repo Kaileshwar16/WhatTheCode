@@ -1,56 +1,57 @@
 console.log("Code Explainer content script loaded.");
 
-// 1. Create the tooltip UI element
+// Create the tooltip UI element
 const tooltip = document.createElement('div');
 tooltip.id = 'code-explainer-tooltip';
+tooltip.style.position = "absolute";
+tooltip.style.background = "#111";
+tooltip.style.color = "white";
+tooltip.style.padding = "10px";
+tooltip.style.borderRadius = "8px";
+tooltip.style.whiteSpace = "pre-wrap";
+tooltip.style.maxWidth = "400px";
+tooltip.style.fontSize = "13px";
+tooltip.style.zIndex = "999999";
+tooltip.style.display = "none";
 document.body.appendChild(tooltip);
 
-// 2. Find all code blocks to make them "explainable"
-// On GitHub, code is often in <pre> tags
+// Find all <pre> code blocks
 const codeBlocks = document.querySelectorAll('pre');
 
-// 3. Add event listeners to each code block
 codeBlocks.forEach(block => {
-  block.style.cursor = 'help'; // Change cursor to '?'
+  block.style.cursor = 'help';
 
   block.addEventListener('mouseover', (e) => {
-    // Get the code text
     const code = block.innerText;
+    console.log("Selected code:", code);
 
-    // Show "Loading..." in the tooltip
-    tooltip.innerText = 'Loading AI explanation...';
-    positionAndShowTooltip(e);
+    tooltip.innerText = "Loading AI explanation...";
+    positionTooltip(e);
 
-    // 4. Send the code to the background script
     chrome.runtime.sendMessage(
       { action: 'getExplanation', code: code },
       (response) => {
-        // 5. This is the callback function. It runs when the background script replies.
         if (chrome.runtime.lastError) {
-          // Handle errors (e.g., if background script is broken)
-          tooltip.innerText = 'Error: Could not get explanation.';
-          console.error(chrome.runtime.lastError.message);
+          tooltip.innerText = "Error: Could not get explanation.";
         } else {
-          // Success! Show the explanation (or error) from the backend
-          tooltip.innerText = response.explanation;
+          tooltip.innerText = 
+            "CODE:\n" + code + 
+            "\n\nEXPLANATION:\n" + response.explanation;
         }
-        
-        // Re-position in case content reflowed (e.g., long explanation)
-        positionAndShowTooltip(e);
+
+        positionTooltip(e);
       }
     );
   });
 
   block.addEventListener('mouseout', () => {
-    // Hide the tooltip
-    tooltip.style.display = 'none';
+    tooltip.style.display = "none";
   });
 });
 
-// Helper function to position the tooltip near the mouse
-function positionAndShowTooltip(e) {
-  // e.pageX and e.pageY give the mouse position relative to the document
+// Position tooltip near mouse
+function positionTooltip(e) {
   tooltip.style.left = `${e.pageX + 15}px`;
   tooltip.style.top = `${e.pageY + 15}px`;
-  tooltip.style.display = 'block';
+  tooltip.style.display = "block";
 }

@@ -3,8 +3,13 @@
   "name": "WhatTheCode",
   "version": "1.0",
   "description": "Explains code snippets using your local AI backend.",
-  "permissions": ["scripting", "activeTab"],
-  "host_permissions": ["http://127.0.0.1:5000/*"],
+  "permissions": [
+    "scripting",
+    "activeTab"
+  ],
+  "host_permissions": [
+    "http://127.0.0.1:5000/*"
+  ],
   "background": {
     "service_worker": "background.js"
   },
