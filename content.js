@@ -1,8 +1,8 @@
 console.log("Code Explainer content script loaded.");
 
-// Create the tooltip UI element
-const tooltip = document.createElement('div');
-tooltip.id = 'code-explainer-tooltip';
+// Create tooltip
+const tooltip = document.createElement("div");
+tooltip.id = "code-explainer-tooltip";
 tooltip.style.position = "absolute";
 tooltip.style.background = "#111";
 tooltip.style.color = "white";
@@ -15,41 +15,58 @@ tooltip.style.zIndex = "999999";
 tooltip.style.display = "none";
 document.body.appendChild(tooltip);
 
-// Find all <pre> code blocks
-const codeBlocks = document.querySelectorAll('pre');
+// 👇👇 THIS IS WHERE YOUR NEW SELECTOR GOES 👇👇
+function findCodeBlocks() {
+  return document.querySelectorAll(`
+    pre,
+    code,
+    .blob-code,
+    .blob-code-inner,
+    .js-file-line,
+    table.highlight td
+  `);
+}
 
-codeBlocks.forEach(block => {
-  block.style.cursor = 'help';
+// Attach listeners to all GitHub code blocks
+function attachListeners() {
+  const blocks = findCodeBlocks();
 
-  block.addEventListener('mouseover', (e) => {
-    const code = block.innerText;
-    console.log("Selected code:", code);
+  blocks.forEach(block => {
+    if (block.dataset.explainerAttached) return;
+    block.dataset.explainerAttached = "true";
 
-    tooltip.innerText = "Loading AI explanation...";
-    positionTooltip(e);
+    block.style.cursor = "help";
 
-    chrome.runtime.sendMessage(
-      { action: 'getExplanation', code: code },
-      (response) => {
-        if (chrome.runtime.lastError) {
-          tooltip.innerText = "Error: Could not get explanation.";
-        } else {
-          tooltip.innerText = 
-            "CODE:\n" + code + 
-            "\n\nEXPLANATION:\n" + response.explanation;
+    block.addEventListener("mouseover", (e) => {
+      const code = block.innerText.trim();
+      if (!code) return;
+
+      tooltip.innerText = "Loading AI explanation...";
+      positionTooltip(e);
+
+      chrome.runtime.sendMessage(
+        { action: "getExplanation", code },
+        (response) => {
+          tooltip.innerText = `CODE:\n${code}\n\nEXPLANATION:\n${response.explanation}`;
+          positionTooltip(e);
         }
+      );
+    });
 
-        positionTooltip(e);
-      }
-    );
+    block.addEventListener("mouseout", () => {
+      tooltip.style.display = "none";
+    });
   });
+}
 
-  block.addEventListener('mouseout', () => {
-    tooltip.style.display = "none";
-  });
-});
+// Run immediately
+attachListeners();
 
-// Position tooltip near mouse
+// GitHub loads pages dynamically → MUST watch DOM updates
+const observer = new MutationObserver(() => attachListeners());
+observer.observe(document.body, { childList: true, subtree: true });
+
+// Position tooltip
 function positionTooltip(e) {
   tooltip.style.left = `${e.pageX + 15}px`;
   tooltip.style.top = `${e.pageY + 15}px`;
