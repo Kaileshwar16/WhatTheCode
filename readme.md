@@ -44,7 +44,7 @@ The content script automatically detects code blocks:
 
 Then it sends the code to the background script → your Python backend → Gemini API → returns an explanation.
 
-### 2️⃣ Python Backend (Flask)
+### 2️⃣ Python Backend (FASTAPI)
 
 The backend:
 - Accepts POST requests from the extension  
